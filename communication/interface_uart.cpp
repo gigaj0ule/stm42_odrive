@@ -5,7 +5,7 @@
 
 #include <MotorControl/utils.h>
 
-#include <fibre/protocol.hpp>
+#include <protocol.hpp>
 #include <usart.h>
 #include <cmsis_os.h>
 #include <freertos_vars.h>

@@ -11,7 +11,7 @@
 // btw this pattern is not so uncommon, for instance IIRC the stdlib uses it too
 
 #ifdef __cplusplus
-#include <fibre/protocol.hpp>
+#include <protocol.hpp>
 extern "C" {
 #endif
 

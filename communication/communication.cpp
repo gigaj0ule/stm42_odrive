@@ -143,76 +143,135 @@ public:
 // how much headroom you have.
 static inline auto make_obj_tree() {
     return make_protocol_member_list(
-        make_protocol_ro_string("make", &communicable.device_make, sizeof(communicable.device_make)),
-        make_protocol_ro_string("model", &communicable.device_model, sizeof(communicable.device_model)),
-        make_protocol_ro_number("serial_number", &serial_number),
 
         // Volatile Objects
-        make_protocol_object("vm",
+        make_protocol_object("volatile",
+
             communicable.customized_volatile_objects(), 
-            make_protocol_ro_number("vbus_voltage", &vbus_voltage),
-            /*make_protocol_ro_number("hw_version_major", &hw_version_major),
-            make_protocol_ro_number("hw_version_minor", &hw_version_minor),
-            make_protocol_ro_number("hw_version_variant", &hw_version_variant),
-            make_protocol_ro_number("fw_version_major", &fw_version_major),
-            make_protocol_ro_number("fw_version_minor", &fw_version_minor),
-            make_protocol_ro_number("fw_version_revision", &fw_version_revision),
-            make_protocol_ro_number("fw_version_unreleased", &fw_version_unreleased),
-            */
-            make_protocol_ro_number("user_config_loaded", const_cast<const bool *>(&user_config_loaded_)),
-            make_protocol_ro_number("brake_resistor_armed", &brake_resistor_armed),
+        
+            make_protocol_number_kw(
+                &vbus_voltage,
+                property_name = "vbus_voltage", 
+                property_is_read_only = true
+            ),
+            make_protocol_number_kw(
+                const_cast<bool *>(&user_config_loaded_),
+                property_name = "user_config_loaded", 
+                property_is_read_only = true
+            ),
+            make_protocol_number_kw(
+                &brake_resistor_armed,
+                property_name = "brake_resistor_armed", 
+                property_is_read_only = true
+            ),
             make_protocol_object("system_stats",
-                make_protocol_ro_number("uptime", &system_stats_.uptime),
-                make_protocol_ro_number("min_heap_space", &system_stats_.min_heap_space),
-                make_protocol_ro_number("min_stack_space_axis0", &system_stats_.min_stack_space_axis0)//,
+                make_protocol_number_kw(
+                    &system_stats_.uptime,
+                    property_name = "uptime",
+                    property_is_read_only = true 
+                ),
+                make_protocol_number_kw(
+                    &system_stats_.min_heap_space,
+                    property_name = "min_heap_space",
+                    property_is_read_only = true 
+                ),
+                make_protocol_number_kw(
+                    &system_stats_.min_stack_space_axis0,
+                    property_name = "min_stack_space_axis0",
+                    property_is_read_only = true 
+                )//,
                 
                 /*
-                make_protocol_ro_number("min_stack_space_axis1", &system_stats_.min_stack_space_axis1),
-                make_protocol_ro_number("min_stack_space_comms", &system_stats_.min_stack_space_comms),
-                make_protocol_ro_number("min_stack_space_usb", &system_stats_.min_stack_space_usb),
-                make_protocol_ro_number("min_stack_space_uart", &system_stats_.min_stack_space_uart),
-                make_protocol_ro_number("min_stack_space_usb_irq", &system_stats_.min_stack_space_usb_irq),
-                make_protocol_ro_number("min_stack_space_startup", &system_stats_.min_stack_space_startup),
+                make_protocol_number_kw("min_stack_space_axis1", &system_stats_.min_stack_space_axis1),
+                make_protocol_number_kw("min_stack_space_comms", &system_stats_.min_stack_space_comms),
+                make_protocol_number_kw("min_stack_space_usb", &system_stats_.min_stack_space_usb),
+                make_protocol_number_kw("min_stack_space_uart", &system_stats_.min_stack_space_uart),
+                make_protocol_number_kw("min_stack_space_usb_irq", &system_stats_.min_stack_space_usb_irq),
+                make_protocol_number_kw("min_stack_space_startup", &system_stats_.min_stack_space_startup),
                 */
 
                 /*make_protocol_object("usb",
-                    make_protocol_ro_number("rx_cnt", &usb_stats_.rx_cnt),
-                    make_protocol_ro_number("tx_cnt", &usb_stats_.tx_cnt),
-                    make_protocol_ro_number("tx_overrun_cnt", &usb_stats_.tx_overrun_cnt)
+                    make_protocol_number_kw("rx_cnt", &usb_stats_.rx_cnt),
+                    make_protocol_number_kw("tx_cnt", &usb_stats_.tx_cnt),
+                    make_protocol_number_kw("tx_overrun_cnt", &usb_stats_.tx_overrun_cnt)
                 )*/
                 /*,
                 make_protocol_object("i2c",
-                    make_protocol_ro_number("addr", &i2c_stats_.addr),
-                    make_protocol_ro_number("addr_match_cnt", &i2c_stats_.addr_match_cnt),
-                    make_protocol_ro_number("rx_cnt", &i2c_stats_.rx_cnt),
-                    make_protocol_ro_number("error_cnt", &i2c_stats_.error_cnt)
+                    make_protocol_number_kw("addr", &i2c_stats_.addr),
+                    make_protocol_number_kw("addr_match_cnt", &i2c_stats_.addr_match_cnt),
+                    make_protocol_number_kw("rx_cnt", &i2c_stats_.rx_cnt),
+                    make_protocol_number_kw("error_cnt", &i2c_stats_.error_cnt)
                 )*/
             )
             ,
             make_protocol_object("config",
-                make_protocol_number("brake_resistance", &board_config.brake_resistance),
-                // TODO: changing this currently requires a reboot - fix this
-                make_protocol_number("enable_uart", &board_config.enable_uart),
-                //make_protocol_number("enable_i2c_instead_of_can" , &board_config.enable_i2c_instead_of_can), // requires a reboot
-                //make_protocol_number("enable_ascii_protocol_on_usb", &board_config.enable_ascii_protocol_on_usb),
-                make_protocol_number("dc_bus_undervoltage_trip_level", &board_config.dc_bus_undervoltage_trip_level),
-                make_protocol_number("dc_bus_overvoltage_trip_level", &board_config.dc_bus_overvoltage_trip_level)
+
+                make_protocol_number_kw(
+                    &board_config.brake_resistance,
+                    property_name = "brake_resistance" 
                 ),
+                // TODO: changing this currently requires a reboot - fix this
+                make_protocol_number_kw(
+                    &board_config.enable_uart,
+                    property_name = "enable_uart"
+                ),
+                //make_protocol_number_kw("enable_i2c_instead_of_can" , &board_config.enable_i2c_instead_of_can), // requires a reboot
+                //make_protocol_number_kw("enable_ascii_protocol_on_usb", &board_config.enable_ascii_protocol_on_usb),
+                make_protocol_number_kw(
+                    &board_config.dc_bus_undervoltage_trip_level,
+                    property_name = "dc_bus_undervoltage_trip_level"
+                ),
+                make_protocol_number_kw(
+                    &board_config.dc_bus_overvoltage_trip_level,
+                    property_name = "dc_bus_overvoltage_trip_level"
+                )
+            ),
             #ifdef __E_VEHICLE_HPP
             //make_protocol_object("e_vehicle", ev->make_protocol_definitions()),
             #endif
-            make_protocol_object("axis0", axes[0]->make_protocol_definitions()),
+            
+            make_protocol_object(
+                "axis0", 
+                axes[0]->make_protocol_definitions()
+            ),
+
             //make_protocol_object("can", can1_ctx.make_protocol_definitions()),
-            make_protocol_function("get_oscilloscope_val", static_functions, &StaticFunctions::get_oscilloscope_val, "channel", "index"),
-            make_protocol_function("get_adc_voltage", static_functions, &StaticFunctions::get_adc_voltage_, "gpio")
+            make_protocol_function_kw(
+                static_functions, 
+                &StaticFunctions::get_oscilloscope_val, 
+                property_name = "get_oscilloscope_val", 
+                function_arguments = std::array<const char *, 2>{"channel", "index"}
+            ),
+            make_protocol_function_kw(
+                static_functions, 
+                &StaticFunctions::get_adc_voltage_, 
+                property_name = "get_adc_voltage", 
+                function_arguments = std::array<const char *, 1>{"gpio"}
+            )
         ),
         
         // Non Volatile Objects
         make_protocol_object("nvm",
-            make_protocol_string("id", &NvmBuiltins.device_id, sizeof(NvmBuiltins.device_id)),
+
+            make_protocol_string_kw(
+                &NvmBuiltins.device_id, 
+                property_name = "id", 
+                property_length = sizeof(NvmBuiltins.device_id),
+                property_is_non_volatile = true
+            ),
+            
             communicable.customized_nonvolatile_objects(),
-            make_protocol_function("save", static_functions, &StaticFunctions::save_configuration_static),
-            make_protocol_function("erase", static_functions, &StaticFunctions::erase_configuration_static)        
+
+            make_protocol_function_kw(
+                static_functions, 
+                &StaticFunctions::save_configuration_static,
+                property_name = "save"
+            ),
+            make_protocol_function_kw(
+                static_functions, 
+                &StaticFunctions::erase_configuration_static,
+                property_name = "erase"    
+            )        
         ),
 
         // Event handlers (if any)
@@ -220,8 +279,16 @@ static inline auto make_obj_tree() {
             communicable.customized_event_triggers()
         ),
 
-        make_protocol_function("reboot", static_functions, &StaticFunctions::reboot_system_static),
-        make_protocol_function("dfu", static_functions, &StaticFunctions::enter_dfu_static)
+        make_protocol_function_kw(
+            static_functions, 
+            &StaticFunctions::reboot_system_static,
+            property_name = "reboot"
+        ),
+        make_protocol_function_kw(
+            static_functions, 
+            &StaticFunctions::enter_dfu_static,
+            property_name = "dfu"
+        )
     );
 }
 

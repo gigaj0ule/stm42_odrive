@@ -7,7 +7,7 @@ Encoder::Encoder(const EncoderHardwareConfig_t& hw_config,
         hw_config_(hw_config),
         config_(config)
 {
-    update_pll_gains();
+    //update_pll_gains();
 
     if (config.pre_calibrated && (config.mode == Encoder::MODE_HALL || config.mode == Encoder::MODE_SINCOS)) {
         is_ready_ = true;
@@ -70,6 +70,7 @@ void Encoder::set_idx_subscribe(bool override_enable) {
     }
 }
 
+/*
 void Encoder::update_pll_gains() {
     pll_kp_ = 2.0f * config_.bandwidth;  // basic conversion to discrete time
     pll_ki_ = 0.25f * (pll_kp_ * pll_kp_); // Critically damped
@@ -79,6 +80,7 @@ void Encoder::update_pll_gains() {
         set_error(ERROR_UNSTABLE_GAIN);
     }
 }
+*/
 
 void Encoder::check_pre_calibrated() {
     if (!is_ready_)
@@ -433,6 +435,9 @@ bool Encoder::update() {
     delta_pos_cpr = wrap_pm(delta_pos_cpr, 0.5f * (float)(config_.cpr));
 
     // pll feedback
+    pll_kp_ = 2.0f * config_.bandwidth;  // basic conversion to discrete time
+    pll_ki_ = 0.25f * (pll_kp_ * pll_kp_); // Critically damped
+
     pos_estimate_ += current_meas_period * pll_kp_ * delta_pos;
     pos_cpr_      += current_meas_period * pll_kp_ * delta_pos_cpr;
     pos_cpr_ = fmodf_pos(pos_cpr_, (float)(config_.cpr));

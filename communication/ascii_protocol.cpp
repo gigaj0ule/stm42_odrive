@@ -12,7 +12,7 @@
 #include "communication.h"
 #include "ascii_protocol.hpp"
 #include <utils.h>
-#include <fibre/cpp_utils.hpp>
+#include <cpp_utils.hpp>
 
 /* Private macros ------------------------------------------------------------*/
 /* Private typedef -----------------------------------------------------------*/

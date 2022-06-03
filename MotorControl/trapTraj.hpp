@@ -23,11 +23,25 @@ public:
 
     auto make_protocol_definitions() {
         return make_protocol_member_list(
+
             make_protocol_object("config",
-                make_protocol_number("vel_limit", &config_.vel_limit),
-                make_protocol_number("accel_limit", &config_.accel_limit),
-                make_protocol_number("decel_limit", &config_.decel_limit),
-                make_protocol_number("A_per_css", &config_.A_per_css)
+            
+                make_protocol_number_kw(
+                    &config_.vel_limit,
+                    property_name = "vel_limit"
+                ),
+                make_protocol_number_kw(
+                    &config_.accel_limit,
+                    property_name = "accel_limit"
+                ),
+                make_protocol_number_kw(
+                    &config_.decel_limit,
+                    property_name = "decel_limit"
+                ),
+                make_protocol_number_kw(
+                    &config_.A_per_css,
+                    property_name = "A_per_css"
+                )
             )
         );
     }

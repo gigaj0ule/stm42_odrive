@@ -1,7 +1,7 @@
 #ifndef __INTERFACE_CAN_HPP
 #define __INTERFACE_CAN_HPP
 
-#include "fibre/protocol.hpp"
+#include "protocol.hpp"
 #include <stm32f4xx_hal.h>
 #include <cmsis_os.h>
 
@@ -39,13 +39,41 @@ struct CAN_context {
 
     auto make_protocol_definitions() {
         return make_protocol_member_list(
-            make_protocol_ro_number("node_id", &node_id),
-            make_protocol_ro_number("TxMailboxCompleteCallbackCnt", &TxMailboxCompleteCallbackCnt),
-            make_protocol_ro_number("TxMailboxAbortCallbackCnt", &TxMailboxAbortCallbackCnt),
-            make_protocol_ro_number("received_msg_cnt", &received_msg_cnt),
-            make_protocol_ro_number("received_ack", &received_ack),
-            make_protocol_ro_number("unexpected_errors", &unexpected_errors),
-            make_protocol_ro_number("unhandled_messages", &unhandled_messages)
+            make_protocol_number_kw(
+                &node_id,
+                property_name = "node_id",
+                property_is_read_only = true
+            ),
+            make_protocol_number_kw(
+                &TxMailboxCompleteCallbackCnt,
+                property_name = "TxMailboxCompleteCallbackCnt", 
+                property_is_read_only = true
+            ),
+            make_protocol_number_kw(
+                &TxMailboxAbortCallbackCnt,
+                property_name = "TxMailboxAbortCallbackCnt", 
+                property_is_read_only = true
+            ),
+            make_protocol_number_kw(
+                &received_msg_cnt,
+                property_name = "received_msg_cnt", 
+                property_is_read_only = true
+            ),
+            make_protocol_number_kw(
+                &received_ack,
+                property_name = "received_ack", 
+                property_is_read_only = true
+            ),
+            make_protocol_number_kw(
+                &unexpected_errors,
+                property_name = "unexpected_errors", 
+                property_is_read_only = true
+            ),
+            make_protocol_number_kw(
+                &unhandled_messages,
+                property_name = "unhandled_messages", 
+                property_is_read_only = true
+            )
         );
     }
 };

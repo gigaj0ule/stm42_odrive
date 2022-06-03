@@ -259,45 +259,118 @@ public:
     auto make_protocol_definitions() {
         return make_protocol_member_list(
             
-            make_protocol_number("error", &error_),
-            make_protocol_ro_number("step_dir_active", &step_dir_active_),            
-            make_protocol_ro_selection("current_state", (int32_t *) &current_state_, nullptr, axis_states_, 12),
-            make_protocol_selection("requested_state", (int32_t *) &requested_state_, nullptr, axis_states_, 12),
-            make_protocol_ro_number("loop_counter", &loop_counter_),
-            make_protocol_ro_selection("lockin_state", (int32_t *) &lockin_state_, nullptr, lockin_states_, 4),
+            make_protocol_number_kw(
+                &error_,
+                property_name = "error"
+            ),
+            make_protocol_number_kw(
+                &step_dir_active_,
+                property_name = "step_dir_active",
+                property_is_read_only = true
+            ),            
+            make_protocol_selection_kw(
+                (int32_t *) &current_state_, 
+                property_name = "current_state", 
+                property_option_strings = axis_states_,
+                property_option_count = 12,
+                property_is_read_only = true
+            ),
+            make_protocol_selection_kw(
+                (int32_t *) &requested_state_, 
+                property_name = "requested_state", 
+                property_option_strings = axis_states_,
+                property_option_count = 12
+            ),
+            make_protocol_number_kw(
+                &loop_counter_,
+                property_name = "loop_counter", 
+                property_is_read_only = true
+            ),
+            make_protocol_selection_kw(
+                (int32_t *) &lockin_state_, 
+                property_name = "lockin_state", 
+                property_option_strings = lockin_states_, 
+                property_option_count = 4,
+                property_is_read_only = true
+            ),
+
             make_protocol_object("config",
-                make_protocol_number("startup_motor_calibration", &config_.startup_motor_calibration),
-                //make_protocol_number("startup_encoder_index_search", &config_.startup_encoder_index_search),
-                make_protocol_number("startup_encoder_offset_calibration", &config_.startup_encoder_offset_calibration),
-                make_protocol_number("startup_closed_loop_control", &config_.startup_closed_loop_control),
-                make_protocol_number("startup_sensorless_control", &config_.startup_sensorless_control),
-                //make_protocol_number("enable_step_dir", &config_.enable_step_dir),
-                //make_protocol_number("counts_per_step", &config_.counts_per_step),
-                /*make_protocol_number("watchdog_timeout", &config_.watchdog_timeout, nullptr, 0.0f, 0.0f,
+
+                make_protocol_number_kw(
+                    &config_.startup_motor_calibration,
+                    property_name = "startup_motor_calibration" 
+                ),
+                //make_protocol_number_kw("startup_encoder_index_search", &config_.startup_encoder_index_search),
+                make_protocol_number_kw(
+                    &config_.startup_encoder_offset_calibration,
+                    property_name = "startup_encoder_offset_calibration"
+                ),
+                make_protocol_number_kw(
+                    &config_.startup_closed_loop_control,
+                    property_name = "startup_closed_loop_control"
+                ),
+                make_protocol_number_kw(
+                    &config_.startup_sensorless_control,
+                    property_name = "startup_sensorless_control"
+                ),
+                //make_protocol_number_kw("enable_step_dir", &config_.enable_step_dir),
+                //make_protocol_number_kw("counts_per_step", &config_.counts_per_step),
+                /*make_protocol_number_kw("watchdog_timeout", &config_.watchdog_timeout, nullptr, 0.0f, 0.0f,
                     [](void* ctx) { static_cast<Axis*>(ctx)->update_watchdog_settings(); }, this),
-                make_protocol_number("step_gpio_pin", &config_.step_gpio_pin, nullptr, (int32_t) 0, (int32_t) 0,
+                make_protocol_number_kw("step_gpio_pin", &config_.step_gpio_pin, nullptr, (int32_t) 0, (int32_t) 0,
                     [](void* ctx) { static_cast<Axis*>(ctx)->decode_step_dir_pins(); }, this),
-                make_protocol_number("dir_gpio_pin", &config_.dir_gpio_pin, nullptr, (int32_t) 0, (int32_t) 0,
+                make_protocol_number_kw("dir_gpio_pin", &config_.dir_gpio_pin, nullptr, (int32_t) 0, (int32_t) 0,
                     [](void* ctx) { static_cast<Axis*>(ctx)->decode_step_dir_pins(); }, this),
                 */
                 make_protocol_object("lockin",
-                    make_protocol_number("current", &config_.lockin.current),
-                    make_protocol_number("ramp_time", &config_.lockin.ramp_time),
-                    make_protocol_number("ramp_distance", &config_.lockin.ramp_distance),
-                    make_protocol_number("accel", &config_.lockin.accel),
-                    make_protocol_number("vel", &config_.lockin.vel),
-                    make_protocol_number("finish_distance", &config_.lockin.finish_distance),
-                    make_protocol_number("initial_phase", &config_.lockin.initial_phase),                    
-                    make_protocol_number("finish_on_vel", &config_.lockin.finish_on_vel),
-                    make_protocol_number("finish_on_distance", &config_.lockin.finish_on_distance),
-                    make_protocol_number("finish_on_enc_idx", &config_.lockin.finish_on_enc_idx)
+                    make_protocol_number_kw(
+                        &config_.lockin.current,
+                        property_name = "current"
+                    ),
+                    make_protocol_number_kw(
+                        &config_.lockin.ramp_time,
+                        property_name = "ramp_time"
+                    ),
+                    make_protocol_number_kw(
+                        &config_.lockin.ramp_distance,
+                        property_name = "ramp_distance"
+                    ),
+                    make_protocol_number_kw(
+                        &config_.lockin.accel,
+                        property_name = "accel"
+                    ),
+                    make_protocol_number_kw(
+                        &config_.lockin.vel,
+                        property_name = "vel"
+                    ),
+                    make_protocol_number_kw(
+                        &config_.lockin.finish_distance,
+                        property_name = "finish_distance"
+                    ),
+                    make_protocol_number_kw(
+                        &config_.lockin.initial_phase,
+                        property_name = "initial_phase"
+                    ),                    
+                    make_protocol_number_kw(
+                        &config_.lockin.finish_on_vel,
+                        property_name = "finish_on_vel"
+                    ),
+                    make_protocol_number_kw(
+                        &config_.lockin.finish_on_distance,
+                        property_name = "finish_on_distance"
+                    ),
+                    make_protocol_number_kw(
+                        &config_.lockin.finish_on_enc_idx,
+                        property_name = "finish_on_enc_idx"
+                    )
                 )
             ),
+
             make_protocol_object("motor", motor_.make_protocol_definitions()),
             make_protocol_object("controller", controller_.make_protocol_definitions()),
-            //make_protocol_object("encoder", encoder_.make_protocol_definitions()),
-            make_protocol_object("sensorless_estimator", sensorless_estimator_.make_protocol_definitions())//, */
-            //make_protocol_object("trap_traj", trap_.make_protocol_definitions()),
+            make_protocol_object("encoder", encoder_.make_protocol_definitions()),
+            make_protocol_object("sensorless_estimator", sensorless_estimator_.make_protocol_definitions()),
+            make_protocol_object("trap_traj", trap_.make_protocol_definitions())
             //make_protocol_function("watchdog_feed", *this, &Axis::watchdog_feed)
         );
     }

@@ -3,7 +3,7 @@
 
 
 /* Includes ------------------------------------------------------------------*/
-#include <fibre/protocol.hpp>
+#include <protocol.hpp>
 
 #include <stdlib.h>
 #include <stdint.h>

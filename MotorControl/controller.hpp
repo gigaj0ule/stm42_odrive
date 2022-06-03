@@ -25,7 +25,7 @@ public:
 
     // Make sure these line up with the enumerated types!
     char control_modes_[6][16] = {
-        "VOLTAGE", 
+        "VOLTAGE",
         "CURRENT",
         "VELOCITY",
         "POSITION",
@@ -45,7 +45,7 @@ public:
         float vel_gain = 5.0f / 10000.0f;  // [A/(counts/s)]
         // float vel_gain = 5.0f / 200.0f; // [A/(rad/s)] <sensorless example>
         float vel_integrator_gain = 10.0f / 10000.0f;  // [A/(counts/s * s)]
-        float vel_derivative_gain = 0.0f;        
+        float vel_derivative_gain = 0.0f;
         #endif
         float vel_limit = 20000.0f;        // [counts/s]
         float vel_limit_tolerance = 1.2f;  // ratio to vel_lim. 0.0f to disable
@@ -74,7 +74,7 @@ public:
     // Trajectory-Planned control
     void move_to_pos(float goal_point);
     void move_incremental(float displacement, bool from_goal_point);
-    
+
     // TODO: make this more similar to other calibration loops
     void start_anticogging_calibration();
     bool anticogging_calibration(float pos_estimate, float vel_estimate);
@@ -98,7 +98,7 @@ public:
         float calib_pos_threshold;
         float calib_vel_threshold;
     } Anticogging_t;
-    
+
     Anticogging_t anticogging_ = {
         .index = 0,
         .cogging_map = nullptr,
@@ -129,7 +129,7 @@ public:
     float vel_setpoint_last_value_  = 0.0f;
 
     bool direct_mode_ = 0;
-    
+
     //float direct_mode_engage_vel_  = 60.0f;
     //float direct_mode_release_vel_ = 100.0f;
     float direct_mode_hysteresis_state_ = 0.0f;
@@ -150,41 +150,144 @@ public:
     // Communication protocol definitions
     auto make_protocol_definitions() {
         return make_protocol_member_list(
-            make_protocol_number("error", &error_),
-            make_protocol_number("pos_setpoint", &pos_setpoint_),
-            make_protocol_number("vel_setpoint", &vel_setpoint_),
-            make_protocol_ro_number("vel_error", &vel_error_),
-            make_protocol_number("vel_integrator_current", &vel_integrator_current_),
-            make_protocol_number("current_setpoint", &current_setpoint_),
-            make_protocol_number("throttle_setpoint", &throttle_setpoint_),
-            make_protocol_number("brake_setpoint", &brake_setpoint_),
-            make_protocol_number("vel_ramp_target", &vel_ramp_target_),
-            make_protocol_number("vel_ramp_enable", &vel_ramp_enable_),
-            make_protocol_number("dc_bias_current", &dc_bias_current_),
-            make_protocol_object("config",
-                make_protocol_selection("control_mode", (int32_t *) &config_.control_mode, nullptr, control_modes_, 6),
-                make_protocol_number("pos_gain", &config_.pos_gain),
-                make_protocol_number("vel_gain", &config_.vel_gain),
-                make_protocol_number("vel_integrator_gain", &config_.vel_integrator_gain),
-                //make_protocol_number("vel_derivative_gain", &config_.vel_derivative_gain),
-                make_protocol_number("vel_limit", &config_.vel_limit),
-                make_protocol_number("vel_limit_tolerance", &config_.vel_limit_tolerance),
-                make_protocol_number("vel_limit_error_enabled", &config_.vel_limit_error_enabled),
-                make_protocol_number("vel_ramp_rate", &config_.vel_ramp_rate),
-                make_protocol_number("throttle_brake_current_limit", &config_.throttle_brake_current_limit),
-                make_protocol_number("throttle_acceleration_current_limit", &config_.throttle_acceleration_current_limit),
-                make_protocol_number("throttle_regen_deceleration_current", &config_.throttle_regen_deceleration_current),
-                make_protocol_number("setpoints_in_cpr", &config_.setpoints_in_cpr)
+
+            make_protocol_number_kw(
+                &error_,
+                property_name = "error"
             ),
-            make_protocol_function("set_pos_setpoint", *this, &Controller::set_pos_setpoint,
-                "pos_setpoint", "vel_feed_forward", "current_feed_forward"),
-            make_protocol_function("set_vel_setpoint", *this, &Controller::set_vel_setpoint,
-                "vel_setpoint", "current_feed_forward"),
-            make_protocol_function("set_current_setpoint", *this, &Controller::set_current_setpoint,
-                                   "current_setpoint"),
-            make_protocol_function("move_to_pos", *this, &Controller::move_to_pos, "pos_setpoint"),
-            make_protocol_function("move_incremental", *this, &Controller::move_incremental, "displacement", "from_goal_point"),
-            make_protocol_function("start_anticogging_calibration", *this, &Controller::start_anticogging_calibration)
+            make_protocol_number_kw(
+                &pos_setpoint_,
+                property_name = "pos_setpoint"
+            ),
+            make_protocol_number_kw(
+                &vel_setpoint_,
+                property_name = "vel_setpoint"
+            ),
+            make_protocol_number_kw(
+                &vel_error_,
+                property_name = "vel_error",
+                property_is_read_only = true
+            ),
+            make_protocol_number_kw(
+                &vel_integrator_current_,
+                property_name = "vel_integrator_current"
+            ),
+            make_protocol_number_kw(
+                &current_setpoint_,
+                property_name = "current_setpoint"
+            ),
+            make_protocol_number_kw(
+                &throttle_setpoint_,
+                property_name = "throttle_setpoint"
+            ),
+            make_protocol_number_kw(
+                &brake_setpoint_,
+                property_name = "brake_setpoint"
+            ),
+            make_protocol_number_kw(
+                &vel_ramp_target_,
+                property_name = "vel_ramp_target"
+            ),
+            make_protocol_number_kw(
+                &vel_ramp_enable_,
+                property_name = "vel_ramp_enable"
+            ),
+            make_protocol_number_kw(
+                &dc_bias_current_,
+                property_name = "dc_bias_current"
+            ),
+
+            make_protocol_object("config",
+
+                make_protocol_selection_kw(
+                    (int32_t *) &config_.control_mode,
+                    property_name = "control_mode",
+                    property_option_strings = control_modes_,
+                    property_option_count = 6
+                ),
+                make_protocol_number_kw(
+                    &config_.pos_gain,
+                    property_name = "pos_gain"
+                ),
+                make_protocol_number_kw(
+                    &config_.vel_gain,
+                    property_name = "vel_gain"
+                ),
+                make_protocol_number_kw(
+                    &config_.vel_integrator_gain,
+                    property_name = "vel_integrator_gain"
+                ),
+                //make_protocol_number_kw("vel_derivative_gain", &config_.vel_derivative_gain),
+                make_protocol_number_kw(
+                    &config_.vel_limit,
+                    property_name = "vel_limit"
+                ),
+                make_protocol_number_kw(
+                    &config_.vel_limit_tolerance,
+                    property_name = "vel_limit_tolerance"
+                ),
+                make_protocol_number_kw(
+                    &config_.vel_limit_error_enabled,
+                    property_name = "vel_limit_error_enabled"
+                ),
+                make_protocol_number_kw(
+                    &config_.vel_ramp_rate,
+                    property_name = "vel_ramp_rate"
+                ),
+                make_protocol_number_kw(
+                    &config_.throttle_brake_current_limit,
+                    property_name = "throttle_brake_current_limit"
+                ),
+                make_protocol_number_kw(
+                    &config_.throttle_acceleration_current_limit,
+                    property_name = "throttle_acceleration_current_limit"
+                ),
+                make_protocol_number_kw(
+                    &config_.throttle_regen_deceleration_current,
+                    property_name = "throttle_regen_deceleration_current"
+                ),
+                make_protocol_number_kw(
+                    &config_.setpoints_in_cpr,
+                    property_name = "setpoints_in_cpr"
+                )
+            ),
+            make_protocol_function_kw(
+                *this,
+                &Controller::set_pos_setpoint,
+                property_name = "set_pos_setpoint",
+                function_arguments = std::array<const char *, 3>{
+                    "pos_setpoint", "vel_feed_forward", "current_feed_forward" }
+            ),
+            make_protocol_function_kw(
+                *this,
+                &Controller::set_vel_setpoint,
+                property_name = "set_vel_setpoint",
+                function_arguments = std::array<const char *, 2>{
+                    "vel_setpoint", "current_feed_forward" }
+            ),
+            make_protocol_function_kw(
+                *this, 
+                &Controller::set_current_setpoint,
+                property_name = "set_current_setpoint",
+                function_arguments = std::array<const char *, 1>{"current_setpoint"}
+            ),
+            make_protocol_function_kw(
+                *this,
+                &Controller::move_to_pos,
+                property_name = "move_to_pos",
+                function_arguments = std::array<const char *, 1>{"pos_setpoint"}
+            ),
+            make_protocol_function_kw(
+                *this,
+                &Controller::move_incremental,
+                property_name = "move_incremental",
+                function_arguments = std::array<const char *, 2>{"displacement", "from_goal_point"}
+            ),
+            make_protocol_function_kw(
+                *this,
+                &Controller::start_anticogging_calibration,
+                property_name = "start_anticogging_calibration"
+            )
         );
     }
 };

@@ -26,7 +26,7 @@ public:
     // Make sure these line up with the enumerated types!
     char encoder_modes_[3][16] = {
         // 0
-        "INCREMENTAL", 
+        "INCREMENTAL",
         "HALL",
         "SINCOS"
     };
@@ -53,7 +53,7 @@ public:
         float offset_float = 0.0f; // Sub-count phase alignment offset
         bool enable_phase_interpolation = true; // Use velocity to interpolate inside the count state
         float calib_range = 0.05f; // Accuracy required to pass encoder cpr check
-        // Set min vel for phase interpolation 
+        // Set min vel for phase interpolation
         int32_t min_phase_interpolation_vel = 100; // [rad/s electrical]
         #ifdef HOVERBOARD_SETTINGS
         float bandwidth = 100.0f;
@@ -68,14 +68,14 @@ public:
 
     Encoder(const EncoderHardwareConfig_t& hw_config,
                      Config_t& config);
-    
+
     void setup();
     void set_error(Error_t error);
     bool do_checks();
 
     void enc_index_cb();
     void set_idx_subscribe(bool override_enable = false);
-    void update_pll_gains();
+    //void update_pll_gains();
     void check_pre_calibrated();
 
     void set_linear_count(int32_t count);
@@ -108,7 +108,7 @@ public:
     float pll_kp_ = 0.0f;   // [count/s / count]
     float pll_ki_ = 0.0f;   // [(count/s^2) / count]
 
-    int16_t tim_cnt_sample_ = 0; // 
+    int16_t tim_cnt_sample_ = 0; //
     // Updated by low_level pwm_adc_cb
     uint8_t hall_state_ = 0x0; // bit[0] = HallA, .., bit[2] = HallC
     float sincos_sample_s_ = 0.0f;
@@ -116,41 +116,138 @@ public:
 
     // Communication protocol definitions
     auto make_protocol_definitions() {
+
         return make_protocol_member_list(
-            make_protocol_number("error", &error_),
-            make_protocol_number("is_ready", &is_ready_),
-            make_protocol_number("index_found", const_cast<bool*>(&index_found_)),
-            make_protocol_number("shadow_count", &shadow_count_),
-            make_protocol_number("count_in_cpr", &count_in_cpr_),
-            make_protocol_number("interpolation", &interpolation_),
-            make_protocol_number("phase", &phase_),
-            make_protocol_number("pos_estimate", &pos_estimate_),
-            make_protocol_number("pos_cpr", &pos_cpr_),
-            make_protocol_number("hall_state", &hall_state_),
-            make_protocol_number("vel_estimate", &vel_estimate_),
-            // make_protocol_number("pll_kp", &pll_kp_),
-            // make_protocol_number("pll_ki", &pll_ki_),
+
+            make_protocol_number_kw(
+                &error_,
+                property_name = "error"
+            ),
+            make_protocol_number_kw(
+                &is_ready_,
+                property_name = "is_ready"
+            ),
+            make_protocol_number_kw(
+                const_cast<bool*>(&index_found_),
+                property_name = "index_found"
+            ),
+            make_protocol_number_kw(
+                &shadow_count_,
+                property_name = "shadow_count"
+            ),
+            make_protocol_number_kw(
+                &count_in_cpr_,
+                property_name = "count_in_cpr"
+            ),
+            make_protocol_number_kw(
+                &interpolation_,
+                property_name = "interpolation"
+            ),
+            make_protocol_number_kw(
+                &phase_,
+                property_name = "phase"
+            ),
+            make_protocol_number_kw(
+                &pos_estimate_,
+                property_name = "pos_estimate"
+            ),
+            make_protocol_number_kw(
+                &pos_cpr_,
+                property_name = "pos_cpr"
+            ),
+            make_protocol_number_kw(
+                &hall_state_,
+                property_name = "hall_state"
+            ),
+            make_protocol_number_kw(
+                &vel_estimate_,
+                property_name = "vel_estimate"
+            ),
+
+            // make_protocol_number_kw("pll_kp", &pll_kp_),
+            // make_protocol_number_kw("pll_ki", &pll_ki_),
+
             make_protocol_object("config",
 
-                make_protocol_selection("mode", (int32_t *) &config_.mode, nullptr, encoder_modes_, 3),        
-                make_protocol_number("use_index", &config_.use_index, nullptr, false, false,
-                    [](void* ctx) { static_cast<Encoder*>(ctx)->set_idx_subscribe(); }, this),
-                make_protocol_number("find_idx_on_lockin_only", &config_.find_idx_on_lockin_only, nullptr, false, false,
-                    [](void* ctx) { static_cast<Encoder*>(ctx)->set_idx_subscribe(); }, this),
-                make_protocol_number("pre_calibrated", &config_.pre_calibrated, nullptr, false, false,
-                    [](void* ctx) { static_cast<Encoder*>(ctx)->check_pre_calibrated(); }, this),
-                make_protocol_number("zero_count_on_find_idx", &config_.zero_count_on_find_idx),
-                make_protocol_number("cpr", &config_.cpr),
-                make_protocol_number("offset", &config_.offset),
-                make_protocol_number("offset_float", &config_.offset_float),
-                make_protocol_number("enable_phase_interpolation", &config_.enable_phase_interpolation),
-                make_protocol_number("min_phase_interpolation_vel", &config_.min_phase_interpolation_vel),
-                make_protocol_number("bandwidth", &config_.bandwidth, nullptr, 0.0f, 0.0f,
-                    [](void* ctx) { static_cast<Encoder*>(ctx)->update_pll_gains(); }, this),
-                make_protocol_number("calib_range", &config_.calib_range),
-                make_protocol_number("idx_search_unidirectional", &config_.idx_search_unidirectional),
-                make_protocol_number("ignore_illegal_hall_state", &config_.ignore_illegal_hall_state),
-                make_protocol_function("set_linear_count", *this, &Encoder::set_linear_count, "count")
+                make_protocol_selection_kw(
+                    (int32_t *) &config_.mode,
+                    property_name = "mode",
+                    property_option_strings = encoder_modes_,
+                    property_option_count = 3
+                ),
+                make_protocol_number_kw(
+                    &config_.use_index,
+                    property_name = "use_index"
+                    //after_written_callback = [](void* ctx) { static_cast<Encoder*>(ctx)->set_idx_subscribe(); }
+                ),
+                make_protocol_number_kw(
+                    &config_.find_idx_on_lockin_only,
+                    property_name = "find_idx_on_lockin_only"
+                    //after_written_callback = [](void* ctx) { static_cast<Encoder*>(ctx)->set_idx_subscribe(); }
+                ),
+                /*
+                make_protocol_function_kw(
+                    *this,
+                    &Encoder::set_idx_subscribe,
+                    property_name = "update_index_settings"
+                ),*/
+                make_protocol_number_kw(
+                    const_cast<bool *>(&config_.pre_calibrated),
+                    property_name = "pre_calibrated"
+                    //[](void* ctx) { static_cast<Encoder*>(ctx)->check_pre_calibrated(); }, this),
+                ),
+                make_protocol_function_kw(
+                    *this,
+                    &Encoder::check_pre_calibrated,
+                    property_name = "check_pre_calibrated"
+                ),         
+                make_protocol_number_kw(
+                    &config_.zero_count_on_find_idx,
+                    property_name = "zero_count_on_find_idx"
+                ),
+                make_protocol_number_kw(
+                    &config_.cpr,
+                    property_name = "cpr"
+                ),
+                make_protocol_number_kw(
+                    &config_.offset,
+                    property_name = "offset"
+                ),
+                make_protocol_number_kw(
+                    &config_.offset_float,
+                    property_name = "offset_float"
+                ),
+                make_protocol_number_kw(
+                    &config_.enable_phase_interpolation,
+                    property_name = "enable_phase_interpolation"
+                ),
+                make_protocol_number_kw(
+                    &config_.min_phase_interpolation_vel,
+                    property_name = "min_phase_interpolation_vel"
+                ),
+                make_protocol_number_kw(
+                    &config_.bandwidth, 
+                    property_name = "bandwidth" 
+                    //after_written_callback = [](void* ctx) { static_cast<Encoder*>(ctx)->update_pll_gains(); }, 
+                ),  
+                make_protocol_number_kw(
+                    &config_.calib_range,
+                    property_name = "calib_range"
+                ),
+                make_protocol_number_kw(
+                    &config_.idx_search_unidirectional,
+                    property_name = "idx_search_unidirectional"
+                ),
+                make_protocol_number_kw(
+                    &config_.ignore_illegal_hall_state,
+                    property_name = "ignore_illegal_hall_state"
+                ),
+                make_protocol_function_kw(
+                    *this, 
+                    &Encoder::set_linear_count, 
+                    property_name = "set_linear_count",
+                    function_arguments = std::array<const char *, 1>{"count"}
+                )
             )
         );
     }

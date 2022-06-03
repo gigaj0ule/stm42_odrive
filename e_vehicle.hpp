@@ -123,38 +123,123 @@ public:
 
     auto make_protocol_definitions() {
         return make_protocol_member_list(
-            make_protocol_number("error", &error_),
-            make_protocol_number("drive_mode", &states_.drive_mode),
-            make_protocol_number("gas_pedal_value", &states_.gas_pedal_value),
-            make_protocol_number("brake_pedal_value", &states_.brake_pedal_value),
-            make_protocol_number("parking_brake_engaged", &states_.parking_brake.engaged),
-            make_protocol_number("cruise_control_engaged", &states_.cruise_control.engaged),
-            make_protocol_number("cruise_control_setpoint", &states_.cruise_control.setpoint),
+            make_protocol_number_kw(
+                &error_,
+                property_name = "error"
+            ),
+            make_protocol_number_kw(
+                &states_.drive_mode,
+                property_name = "drive_mode"
+            ),
+            make_protocol_number_kw(
+                &states_.gas_pedal_value,
+                property_name = "gas_pedal_value"
+            ),
+            make_protocol_number_kw(
+                &states_.brake_pedal_value,
+                property_name = "brake_pedal_value"
+            ),
+            make_protocol_number_kw(
+                &states_.parking_brake.engaged,
+                property_name = "parking_brake_engaged"
+            ),
+            make_protocol_number_kw(
+                &states_.cruise_control.engaged,
+                property_name = "cruise_control_engaged"
+            ),
+            make_protocol_number_kw(
+                &states_.cruise_control.setpoint,
+                property_name = "cruise_control_setpoint"
+            ),
+            
             make_protocol_object("config",
-                make_protocol_number("ev_controller_enabled", &config_.ev_controller_enabled),
-                make_protocol_number("abs_enabled", &config_.abs_enabled),
-                make_protocol_number("gas_adc_min_voltage", &config_.gas_pedal_adc_min_voltage),
-                make_protocol_number("gas_adc_max_voltage", &config_.gas_pedal_adc_max_voltage),
-                make_protocol_number("brake_adc_min_voltage", &config_.brake_pedal_adc_min_voltage),
-                make_protocol_number("brake_adc_max_voltage", &config_.brake_pedal_adc_max_voltage),
+
+                make_protocol_number_kw(
+                    &config_.ev_controller_enabled,
+                    property_name = "ev_controller_enabled"
+                ),
+                make_protocol_number_kw( 
+                    &config_.abs_enabled,
+                    property_name = "abs_enabled"
+                ),
+                make_protocol_number_kw(
+                    &config_.gas_pedal_adc_min_voltage,
+                    property_name = "gas_adc_min_voltage"
+                ),
+                make_protocol_number_kw(
+                    &config_.gas_pedal_adc_max_voltage,
+                    property_name = "gas_adc_max_voltage"
+                ),
+                make_protocol_number_kw(
+                    &config_.brake_pedal_adc_min_voltage,
+                    property_name = "brake_adc_min_voltage"
+                ),
+                make_protocol_number_kw(
+                    &config_.brake_pedal_adc_max_voltage,
+                    property_name = "brake_adc_max_voltage"
+                ),
+
                 make_protocol_object("physics", 
-                    make_protocol_number("drive_config", &config_.physics.drive_config),
-                    make_protocol_number("master_axis", &config_.physics.master_axis),
-                    make_protocol_number("axle_width", &config_.physics.axle_width)
+
+                    make_protocol_number_kw(
+                        &config_.physics.drive_config,
+                        property_name = "drive_config"
+                    ),
+                    make_protocol_number_kw(
+                        &config_.physics.master_axis,
+                        property_name = "master_axis"
+                    ),
+                    make_protocol_number_kw(
+                        &config_.physics.axle_width,
+                        property_name = "axle_width"
+                    )
                 ),
                 make_protocol_object("controller",
-                    make_protocol_number("max_current_limit", &config_.controller_params.max_current_limit),
-                    make_protocol_number("throttle_current_limit", &config_.controller_params.throttle_current_limit),
-                    make_protocol_number("brake_current_limit", &config_.controller_params.brake_current_limit),
-                    make_protocol_number("regen_deceleration_current", &config_.controller_params.regen_deceleration_current),
-                    make_protocol_number("park_current_limit", &config_.controller_params.park_current_limit),
 
-                    make_protocol_number("park_vel_gain", &config_.controller_params.park_vel_gain),
-                    make_protocol_number("park_vel_integrator_gain", &config_.controller_params.park_vel_integrator_gain),
-                    make_protocol_number("park_vel_derivative_gain", &config_.controller_params.park_vel_derivative_gain),
-                    make_protocol_number("drive_vel_gain", &config_.controller_params.drive_vel_gain),
-                    make_protocol_number("drive_vel_integrator_gain", &config_.controller_params.drive_vel_integrator_gain),
-                    make_protocol_number("drive_vel_derivative_gain", &config_.controller_params.drive_vel_derivative_gain)
+                    make_protocol_number_kw(
+                        &config_.controller_params.max_current_limit,
+                        property_name = "max_current_limit"
+                    ),
+                    make_protocol_number_kw(
+                        &config_.controller_params.throttle_current_limit,
+                        property_name = "throttle_current_limit"
+                    ),
+                    make_protocol_number_kw(
+                        &config_.controller_params.brake_current_limit,
+                        property_name = "brake_current_limit"
+                    ),
+                    make_protocol_number_kw(
+                        &config_.controller_params.regen_deceleration_current,
+                        property_name = "regen_deceleration_current"
+                    ),
+                    make_protocol_number_kw(
+                        &config_.controller_params.park_current_limit,
+                        property_name = "park_current_limit"
+                    ),
+                    make_protocol_number_kw(
+                        &config_.controller_params.park_vel_gain,
+                        property_name = "park_vel_gain"
+                    ),
+                    make_protocol_number_kw(
+                        &config_.controller_params.park_vel_integrator_gain,
+                        property_name = "park_vel_integrator_gain"
+                    ),
+                    make_protocol_number_kw(
+                        &config_.controller_params.park_vel_derivative_gain,
+                        property_name = "park_vel_derivative_gain"
+                    ),
+                    make_protocol_number_kw(
+                        &config_.controller_params.drive_vel_gain,
+                        property_name = "drive_vel_gain"
+                    ),
+                    make_protocol_number_kw(
+                        &config_.controller_params.drive_vel_integrator_gain,
+                        property_name = "drive_vel_integrator_gain"
+                    ),
+                    make_protocol_number_kw(
+                        &config_.controller_params.drive_vel_derivative_gain,
+                        property_name = "drive_vel_derivative_gain"
+                    )
                 )
             )
         );

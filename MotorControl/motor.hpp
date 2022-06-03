@@ -24,7 +24,7 @@ public:
         ERROR_CURRENT_SENSE_SATURATION = 0x0400,
         ERROR_INVERTER_OVER_TEMP = 0x0800,
         ERROR_PM_FLUX_LINKAGE_OUT_OF_RANGE = 0x1000,
-        ERROR_UNEXPECTED_ADC_CALLBACK = 0x2000        
+        ERROR_UNEXPECTED_ADC_CALLBACK = 0x2000
     };
 
     enum MotorType_t : int32_t {
@@ -36,7 +36,7 @@ public:
     // Make sure these line up with the enumerated types!
     char motor_types_[3][16] = {
         // 0
-        "HIGH_CURRENT", 
+        "HIGH_CURRENT",
         "unimplemented",
         "GIMBAL"
     };
@@ -60,7 +60,7 @@ public:
         float p_gain; // [V/A]
         float i_gain; // [V/As]
         float p_gain_max; // [V/A]
-        float i_gain_max; // [V/As]        
+        float i_gain_max; // [V/As]
         float v_current_control_integral_d; // [V]
         float v_current_control_integral_q; // [V]
         float Ibus; // DC bus current [A]
@@ -77,14 +77,14 @@ public:
     };
 
     float saved_steady_state_v_current_control_integral_d_;
-    float saved_steady_state_v_current_control_integral_q_;  
+    float saved_steady_state_v_current_control_integral_q_;
 
     // NOTE: for gimbal motors, all units of A are instead V.
     // example: vel_gain is [V/(count/s)] instead of [A/(count/s)]
     // example: current_lim and calibration_current will instead determine the maximum voltage applied to the motor.
     struct Config_t {
         bool pre_calibrated = true; // can be set to true to indicate that all values here are valid
-        
+
         #ifdef HOVERBOARD_SETTINGS
         int32_t pole_pairs = 15;
         #else
@@ -96,19 +96,19 @@ public:
         float phase_inductance = 0.01f;        // to be set by measure_phase_inductance
         float phase_resistance = 0.01f;        // to be set by measure_phase_resistance
         int32_t direction = 1;                // 1 or -1 (0 = unspecified)
-        
+
         MotorType_t motor_type = MOTOR_TYPE_HIGH_CURRENT;
-        
+
         // Read out max_allowed_current to see max supported value for current_lim.
         #ifdef HOVERBOARD_SETTINGS
         float current_lim = 35.0f;  //[A]
         #else
         float current_lim = 10.0f;  //[A]
         #endif
-        
+
         // Value used to compute shunt amplifier gains
         float requested_current_range = 60.0f; // [A]
-        
+
         #ifdef HOVERBOARD_SETTINGS
         float current_control_bandwidth = 100.0f;
         #else
@@ -145,7 +145,7 @@ public:
     // Make sure these line up with the enumerated types!
     char armed_states_[4][16] = {
         // 0
-        "DISARMED", 
+        "DISARMED",
         "WAIT_TIMING",
         "WAIT_UPDATE",
         "ARMED"
@@ -175,7 +175,7 @@ public:
     float phase_current_from_adcval(uint32_t ADCValue);
     bool measure_phase_resistance(float test_current, float max_voltage);
     bool measure_phase_inductance(float voltage_low, float voltage_high, float saturating_current, AplhaBetaType_t measurement_axis);
-    bool measure_motor_dynamics(bool disarm_after);    
+    bool measure_motor_dynamics(bool disarm_after);
     bool run_calibration();
     void reset_timings_stacks();
     bool enqueue_timings(float alphas[6], float betas[6], TimingsType_t timings_type);
@@ -188,7 +188,7 @@ public:
     Config_t& config_;
 
     // Motor's parent axis, set by Axis constructor
-    Axis* axis_ = nullptr; 
+    Axis* axis_ = nullptr;
 
     // These are the timings to be applied from the SVM calculator to the PWM timers
     __attribute__((aligned(4))) uint32_t next_timings_stack_[6][3] = {0};
@@ -209,7 +209,7 @@ public:
     // Current state of the motor and its PWM
     // Do not write to this variable directly!
     // It is for exclusive use by the safety_critical_... functions.
-    ArmedState_t armed_state_ = ARMED_STATE_DISARMED; 
+    ArmedState_t armed_state_ = ARMED_STATE_DISARMED;
     bool is_calibrated_ = config_.pre_calibrated;
 
     // Sampled current measurements for the motor
@@ -220,10 +220,10 @@ public:
     Iph_BC_t DC_calib_ = {0.0f, 0.0f};
 
     // DRV chip
-    DRV8301_Obj gate_driver_; 
+    DRV8301_Obj gate_driver_;
 
     // Reverse of the gain of the ADC to Amperes (to be set by DRV8301_setup)
-    float phase_current_rev_gain_ = 0.0f; 
+    float phase_current_rev_gain_ = 0.0f;
 
     ///////////////////////////////////////////////////////////////
     // These are variables used for high-frequency-injection
@@ -251,51 +251,140 @@ public:
     };
 
     DRV8301_FaultType_e drv_fault_ = DRV8301_FaultType_NoFault;
-    
+
     //Local view of DRV registers (initialized by DRV8301_setup)
-    DRV_SPI_8301_Vars_t gate_driver_regs_; 
-    
+    DRV_SPI_8301_Vars_t gate_driver_regs_;
+
     //[A]
-    float thermal_current_lim_ = 10.0f;  
+    float thermal_current_lim_ = 10.0f;
 
 
     // Communication protocol definitions
     auto make_protocol_definitions() {
         return make_protocol_member_list(
-            make_protocol_number("error", &error_),
-            
-            make_protocol_ro_selection("armed_state", (int32_t *) &armed_state_, nullptr, armed_states_, 4),
+            make_protocol_number_kw(
+                &error_,
+                property_name = "error"
+            ),
+            make_protocol_selection_kw(
+                (int32_t *) &armed_state_,
+                property_name = "armed_state",
+                property_option_strings = armed_states_,
+                property_option_count = 4,
+                property_is_read_only = true
+            ),
+            make_protocol_number_kw(
+                &is_calibrated_,
+                property_name = "is_calibrated"
+            ),
+            make_protocol_number_kw(
+                &current_meas_[2].phB,
+                property_name = "current_meas_phB",
+                property_is_read_only = true
+            ),
+            make_protocol_number_kw(
+                &current_meas_[2].phC,
+                property_name = "current_meas_phC",
+                property_is_read_only = true
+            ),
+            make_protocol_number_kw(
+                &DC_calib_.phB,
+                property_name = "DC_calib_phB"
+            ),
+            make_protocol_number_kw(
+                &DC_calib_.phC,
+                property_name = "DC_calib_phC"
+            ),
+            make_protocol_number_kw(
+                &phase_current_rev_gain_,
+                property_name = "phase_current_rev_gain"
+            ),
+            make_protocol_number_kw(
+                &thermal_current_lim_,
+                property_name = "thermal_current_lim",
+                property_is_read_only = true
+            ),
 
-            make_protocol_number("is_calibrated", &is_calibrated_),
-            make_protocol_ro_number("current_meas_phB", &current_meas_[2].phB),
-            make_protocol_ro_number("current_meas_phC", &current_meas_[2].phC),
-            make_protocol_number("DC_calib_phB", &DC_calib_.phB),
-            make_protocol_number("DC_calib_phC", &DC_calib_.phC),
-            make_protocol_number("phase_current_rev_gain", &phase_current_rev_gain_),
-            make_protocol_ro_number("thermal_current_lim", &thermal_current_lim_),
             //make_protocol_function("get_inverter_temp", *this, &Motor::get_inverter_temp),
+
             make_protocol_object("current_control",
-                make_protocol_number("p_gain", &current_control_.p_gain),
-                make_protocol_number("i_gain", &current_control_.i_gain),
-                make_protocol_number("v_current_control_integral_d", &current_control_.v_current_control_integral_d),
-                make_protocol_number("v_current_control_integral_q", &current_control_.v_current_control_integral_q),
-                make_protocol_number("Ibus", &current_control_.Ibus),
-                //make_protocol_number("final_v_alpha", &current_control_.final_v_alpha),
-                //make_protocol_number("final_v_beta", &current_control_.final_v_beta),
-                make_protocol_number("Iq_setpoint", &current_control_.Iq_setpoint),
-                make_protocol_number("Iq_measured", &current_control_.Iq_measured),
-                make_protocol_number("Id_setpoint", &current_control_.Id_setpoint),
-                make_protocol_number("Id_measured", &current_control_.Id_measured),
-                //make_protocol_number("I_measured_report_filter_k", &current_control_.I_measured_report_filter_k),
-                make_protocol_ro_number("max_allowed_current", &current_control_.max_allowed_current),
-                make_protocol_ro_number("overcurrent_trip_level", &current_control_.overcurrent_trip_level)
+
+                make_protocol_number_kw(
+                    &current_control_.p_gain,
+                    property_name = "p_gain"
+                ),
+                make_protocol_number_kw(
+                    &current_control_.i_gain,
+                    property_name = "i_gain"
+                ),
+                make_protocol_number_kw(
+                    &current_control_.v_current_control_integral_d,
+                    property_name = "v_current_control_integral_d"
+                ),
+                make_protocol_number_kw(
+                    &current_control_.v_current_control_integral_q,
+                    property_name = "v_current_control_integral_q"
+                ),
+                make_protocol_number_kw(
+                    &current_control_.Ibus,
+                    property_name = "Ibus"
+                ),
+                //make_protocol_number_kw("final_v_alpha", &current_control_.final_v_alpha),
+                //make_protocol_number_kw("final_v_beta", &current_control_.final_v_beta),
+                make_protocol_number_kw(
+                    &current_control_.Iq_setpoint,
+                    property_name = "Iq_setpoint"
+                ),
+                make_protocol_number_kw(
+                    &current_control_.Iq_measured,
+                    property_name = "Iq_measured"
+                ),
+                make_protocol_number_kw(
+                    &current_control_.Id_setpoint,
+                    property_name = "Id_setpoint"
+                ),
+                make_protocol_number_kw(
+                    &current_control_.Id_measured,
+                    property_name = "Id_measured"
+                ),
+                //make_protocol_number_kw("I_measured_report_filter_k", &current_control_.I_measured_report_filter_k),
+                make_protocol_number_kw(
+                    &current_control_.max_allowed_current,
+                    property_name = "max_allowed_current",
+                    property_is_read_only = true
+                ),
+                make_protocol_number_kw(
+                    &current_control_.overcurrent_trip_level,
+                    property_name = "overcurrent_trip_level",
+                    property_is_read_only = true
+                )
             ),
             make_protocol_object("gate_driver",
-                make_protocol_ro_number("drv_fault", &drv_fault_),
-                make_protocol_ro_number("status_reg_1", (int32_t *) &gate_driver_regs_.Stat_Reg_1_Value),
-                make_protocol_ro_number("status_reg_2", (int32_t *) &gate_driver_regs_.Stat_Reg_2_Value),
-                make_protocol_ro_number("ctrl_reg_1", (int32_t *) &gate_driver_regs_.Ctrl_Reg_1_Value),
-                make_protocol_ro_number("ctrl_reg_2", (int32_t *) &gate_driver_regs_.Ctrl_Reg_2_Value)
+                make_protocol_number_kw(
+                    &drv_fault_,
+                    property_name = "drv_fault",
+                    property_is_read_only = true
+                ),
+                make_protocol_number_kw(
+                    (int32_t *) &gate_driver_regs_.Stat_Reg_1_Value,
+                    property_name = "status_reg_1",
+                    property_is_read_only = true
+                ),
+                make_protocol_number_kw(
+                    (int32_t *) &gate_driver_regs_.Stat_Reg_2_Value,
+                    property_name = "status_reg_2",
+                    property_is_read_only = true
+                ),
+                make_protocol_number_kw(
+                    (int32_t *) &gate_driver_regs_.Ctrl_Reg_1_Value,
+                    property_name = "ctrl_reg_1",
+                    property_is_read_only = true
+                ),
+                make_protocol_number_kw(
+                    (int32_t *) &gate_driver_regs_.Ctrl_Reg_2_Value,
+                    property_name = "ctrl_reg_2",
+                    property_is_read_only = true
+                )
             ),
             /*
             make_protocol_object("timing_log",
@@ -309,24 +398,62 @@ public:
                 make_protocol_ro_number("TIMING_LOG_FOC_VOLTAGE", &timing_log_[TIMING_LOG_FOC_VOLTAGE]),
                 make_protocol_ro_number("TIMING_LOG_FOC_CURRENT", &timing_log_[TIMING_LOG_FOC_CURRENT])
             ),*/
+
             make_protocol_object("config",
-                make_protocol_number("pre_calibrated", &config_.pre_calibrated),
-                make_protocol_number("pole_pairs", &config_.pole_pairs),
-                make_protocol_number("calibration_current", &config_.calibration_current),
-                make_protocol_number("resistance_calib_max_voltage", &config_.resistance_calib_max_voltage),
-                make_protocol_number("phase_inductance", &config_.phase_inductance),
-                make_protocol_number("phase_resistance", &config_.phase_resistance),
-                make_protocol_number("direction", &config_.direction),
 
-                make_protocol_selection("motor_type", (int32_t *) &config_.motor_type, nullptr, motor_types_, 3),
-
-                make_protocol_number("current_lim", &config_.current_lim),
-                //make_protocol_number("inverter_temp_limit_lower", &config_.inverter_temp_limit_lower),
-                //make_protocol_number("inverter_temp_limit_upper", &config_.inverter_temp_limit_upper),
-                make_protocol_number("requested_current_range", &config_.requested_current_range),
-                make_protocol_number("flux_linkage_calib_velocity", &config_.motor_calibration_velocity),
-                make_protocol_number("current_control_bandwidth", &config_.current_control_bandwidth, nullptr, 0.0f, 0.0f,
-                    [](void* ctx) { static_cast<Motor*>(ctx)->update_current_controller_gains(); }, this)  
+                make_protocol_number_kw(
+                    &config_.pre_calibrated,
+                    property_name = "pre_calibrated"
+                ),
+                make_protocol_number_kw(
+                    &config_.pole_pairs,
+                    property_name = "pole_pairs"
+                ),
+                make_protocol_number_kw(
+                    &config_.calibration_current,
+                    property_name = "calibration_current"
+                ),
+                make_protocol_number_kw(
+                    &config_.resistance_calib_max_voltage,
+                    property_name = "resistance_calib_max_voltage"
+                ),
+                make_protocol_number_kw(
+                    &config_.phase_inductance,
+                    property_name = "phase_inductance"
+                ),
+                make_protocol_number_kw(
+                    &config_.phase_resistance,
+                    property_name = "phase_resistance"
+                ),
+                make_protocol_number_kw(
+                    &config_.direction,
+                    property_name = "direction"
+                ),
+                make_protocol_selection_kw(
+                    (int32_t *) &config_.motor_type,
+                    property_name = "motor_type",
+                    property_option_strings = motor_types_,
+                    property_option_count = 3
+                ),
+                make_protocol_number_kw(
+                    &config_.current_lim,
+                    property_name = "current_lim"
+                ),
+                //make_protocol_number_kw("inverter_temp_limit_lower", &config_.inverter_temp_limit_lower),
+                //make_protocol_number_kw("inverter_temp_limit_upper", &config_.inverter_temp_limit_upper),
+                make_protocol_number_kw(
+                    &config_.requested_current_range,
+                    property_name = "requested_current_range"
+                ),
+                make_protocol_number_kw(
+                    &config_.motor_calibration_velocity,
+                    property_name = "flux_linkage_calib_velocity"
+                )//,
+                /*
+                make_protocol_number_kw(
+                    property_name = "current_control_bandwidth",
+                    &config_.current_control_bandwidth,
+                    [](void* ctx) { static_cast<Motor*>(ctx)->update_current_controller_gains(); }, this) */
             )
         );
     }
